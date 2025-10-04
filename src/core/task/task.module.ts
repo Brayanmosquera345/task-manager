@@ -3,6 +3,7 @@ import { TaskRepositoryImpl } from './infrastructure/persistence/repository/task
 import { CryptoUuidGenerator } from '@/core/shared-infrastructure/uuid/crypto-uuid-generator';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CreateTaskUseCase } from './application/CreateTask/create-task.use-case';
+import { FindTaskByUserUseCase } from './application/FindTaskByUser/find-task-by-user.use-case';
 import TaskController from './infrastructure/http/controller/task.controller';
 import TaskOrmEntity from './infrastructure/persistence/entity/task-orm.entity';
 
@@ -23,6 +24,12 @@ import TaskOrmEntity from './infrastructure/persistence/entity/task-orm.entity';
         uuidGenerator: CryptoUuidGenerator,
       ) => new CreateTaskUseCase(repository, uuidGenerator),
       inject: ['TaskRepository', CryptoUuidGenerator],
+    },
+    {
+      provide: 'FindTaskByUserUseCase',
+      useFactory: (repository: TaskRepositoryImpl) =>
+        new FindTaskByUserUseCase(repository),
+      inject: ['TaskRepository'],
     },
   ],
 })

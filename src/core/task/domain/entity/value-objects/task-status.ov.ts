@@ -1,7 +1,5 @@
 import { InvalidTaskStatusException } from '../../exceptions/invalid-task-status.exception';
 
-export type TaskStatusType = 'PENDING' | 'IN_PROGRESS' | 'DONE';
-
 export enum TaskStatusEnum {
   PENDING = 'PENDING',
   IN_PROGRESS = 'IN_PROGRESS',
@@ -16,7 +14,7 @@ export class TaskStatus {
     this.ensureStatusIsValid();
   }
 
-  get value(): TaskStatusType {
+  get value(): TaskStatusEnum {
     return this._value;
   }
   private ensureStatusIsValid() {

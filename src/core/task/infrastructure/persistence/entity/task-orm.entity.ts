@@ -10,7 +10,6 @@ import {
 } from 'typeorm';
 import UserOrmEntity from '@/core/user/infrastructure/persistence/entity/user-orm.entyti';
 import { TaskStatusEnum } from '@/core/task/domain/entity/value-objects/task-status.ov';
-import type { TaskStatusType } from '@/core/task/domain/entity/value-objects/task-status.ov';
 @Entity('tasks')
 export default class TaskOrmEntity {
   @PrimaryColumn()
@@ -27,7 +26,7 @@ export default class TaskOrmEntity {
     enum: TaskStatusEnum,
     default: TaskStatusEnum.PENDING,
   })
-  status: TaskStatusType;
+  status: TaskStatusEnum;
 
   @Column()
   dueDate: Date;

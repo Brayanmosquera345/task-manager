@@ -1,7 +1,26 @@
-import { Body, Controller, Inject, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Inject,
+  Post,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  ValidationPipe,
+  Query,
+} from '@nestjs/common';
 import { CreateTaskDto } from '../dto/create-task.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateTaskUseCase } from '@/core/task/application/CreateTask/create-task.use-case';
+import { FindTaskByUserUseCase } from '@/core/task/application/FindTaskByUser/find-task-by-user.use-case';
+import { ResponseTaskDto } from '../dto/response-task.dto';
+import { Task } from '@/core/task/domain/entity/task.entity';
+import { Uuid } from '@/core/shared-domain/value-objects/uuid.vo';
+import { mapDomainErrorToHttp } from '@/common/filters/exception.mapper';
+import { FindTasksQueryDto } from '../dto/find-tasks-query.dto';
+import { TaskStatusEnum } from '@/core/task/domain/entity/value-objects/task-status.ov';
+
+const TASK_STATUS_VALUES = Object.values(TaskStatusEnum);
 
 @ApiTags('task')
 @Controller('tasks')
@@ -9,6 +28,8 @@ export default class TaskController {
   constructor(
     @Inject('CreateTaskUseCase')
     private readonly createTaskUseCase: CreateTaskUseCase,
+    @Inject('FindTaskByUserUseCase')
+    private readonly findTaskByUserUseCase: FindTaskByUserUseCase,
   ) {}
 
   @Post()
@@ -22,7 +43,55 @@ export default class TaskController {
         body.userId,
       );
     } catch (error) {
-      throw new Error(error);
+      throw mapDomainErrorToHttp(error);
     }
+  }
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    type: 'string',
+    description: 'Filtro por estado de la tarea.',
+    enum: TASK_STATUS_VALUES,
+  })
+  @ApiQuery({
+    name: 'showDeleted',
+    required: false,
+    type: 'boolean',
+    description: 'Filtro para mostrar tareas eliminadas.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Listado de tareas',
+    type: [ResponseTaskDto],
+  })
+  @Get('/user/:userId')
+  async findTaskByUserId(
+    @Param('userId', new ParseUUIDPipe({ version: '4' })) userId: string,
+    @Query(new ValidationPipe({ transform: true })) query: FindTasksQueryDto,
+  ): Promise<ResponseTaskDto[]> {
+    try {
+      const id = new Uuid(userId);
+      const tasks = await this.findTaskByUserUseCase.execute(
+        id,
+        query.status,
+        query.showDeleted,
+      );
+      return tasks.map((task) => this.toResponseDto(task));
+    } catch (error) {
+      throw mapDomainErrorToHttp(error);
+    }
+  }
+
+  private toResponseDto(task: Task): ResponseTaskDto {
+    return {
+      id: task.id,
+      name: task.name.value,
+      description: task.description.value,
+      status: task.status.value,
+      dueDate: task.dueDate.value.toDateString(),
+      createdAt: task.createdAt.toDateString(),
+      updatedAt: task.updatedAt.toDateString(),
+      deletedAt: task.deletedAt?.toDateString() ?? null,
+    };
   }
 }

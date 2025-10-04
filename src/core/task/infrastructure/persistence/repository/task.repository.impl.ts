@@ -4,6 +4,17 @@ import TaskOrmEntity from '../entity/task-orm.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QueryFailedError, Repository } from 'typeorm';
 import { InvalidTaskUserIdException } from '@/core/task/domain/exceptions/invalid-task-user-id.exception';
+import { Uuid } from '@/core/shared-domain/value-objects/uuid.vo';
+import { TaskName } from '@/core/task/domain/entity/value-objects/task-name.ov';
+import { TaskDescription } from '@/core/task/domain/entity/value-objects/task-description.ov';
+import {
+  TaskStatus,
+  TaskStatusEnum,
+} from '@/core/task/domain/entity/value-objects/task-status.ov';
+import { TaskDueDate } from '@/core/task/domain/entity/value-objects/task-due-date.ov';
+import { CreatedAt } from '@/core/shared-domain/value-objects/create-at.vo';
+import { UpdatedAt } from '@/core/shared-domain/value-objects/update-at.vo';
+import { DeletedAt } from '@/core/shared-domain/value-objects/delete-at.vo';
 
 interface PostgresError extends QueryFailedError {
   code: string;
@@ -40,5 +51,39 @@ export class TaskRepositoryImpl implements TaskRepository {
       }
       throw e;
     }
+  }
+
+  async findByUserId(
+    userId: string,
+    status?: TaskStatusEnum,
+    showDeleted?: boolean,
+  ): Promise<Task[]> {
+    const queryBuilder = this.repository.createQueryBuilder('tasks');
+    queryBuilder.where('tasks.userId = :userId', { userId });
+
+    if (status) {
+      queryBuilder.andWhere('tasks.status = :status', { status });
+    }
+    if (showDeleted) {
+      queryBuilder.withDeleted();
+    }
+
+    const listTasksOrm = await queryBuilder.getMany();
+
+    return listTasksOrm.map((orm) => this.toDomain(orm));
+  }
+
+  private toDomain(orm: TaskOrmEntity): Task {
+    return Task.reconstitute({
+      id: new Uuid(orm.id),
+      name: new TaskName(orm.name),
+      description: new TaskDescription(orm.description),
+      status: new TaskStatus(orm.status),
+      dueDate: new TaskDueDate(orm.dueDate),
+      userId: new Uuid(orm.userId),
+      createdAt: new CreatedAt(orm.createdAt),
+      updatedAt: new UpdatedAt(orm.updatedAt, orm.createdAt),
+      deletedAt: new DeletedAt(orm.deletedAt, orm.createdAt),
+    });
   }
 }
