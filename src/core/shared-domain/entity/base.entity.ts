@@ -8,12 +8,29 @@ export abstract class EntityBase {
   protected readonly _createdAt: CreatedAt;
   protected _updatedAt: UpdatedAt;
   protected _deletedAt: DeletedAt;
-  constructor(id: Uuid) {
-    const now = new Date();
+  constructor(
+    id: Uuid,
+    createdAt: CreatedAt, // Inyectamos VOs existentes
+    updatedAt: UpdatedAt,
+    deletedAt: DeletedAt,
+  ) {
     this._id = id;
-    this._createdAt = new CreatedAt(now);
-    this._updatedAt = new UpdatedAt(now, now);
-    this._deletedAt = new DeletedAt(null, now);
+    this._createdAt = createdAt;
+    this._updatedAt = updatedAt;
+    this._deletedAt = deletedAt;
+  }
+
+  static createNew(): {
+    createdAt: CreatedAt;
+    updatedAt: UpdatedAt;
+    deletedAt: DeletedAt;
+  } {
+    const now = new Date();
+    return {
+      createdAt: new CreatedAt(now),
+      updatedAt: new UpdatedAt(now, now),
+      deletedAt: new DeletedAt(null, now),
+    };
   }
 
   // getters públicos

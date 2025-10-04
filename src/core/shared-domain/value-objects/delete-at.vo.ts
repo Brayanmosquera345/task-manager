@@ -11,4 +11,8 @@ export class DeletedAt {
   isDeleted(): boolean {
     return this.value !== null;
   }
+
+  static none(createdAt: Date): DeletedAt {
+    return new DeletedAt(null, createdAt);
+  }
 }

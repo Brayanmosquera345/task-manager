@@ -4,6 +4,12 @@ import UserOrmEntity from '../entity/user-orm.entyti';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QueryFailedError, Repository } from 'typeorm';
 import { UserAlreadyExistsError } from '@/core/user/domain/exceptions/user-already-exists.exception';
+import UserName from '@/core/user/domain/entity/value-objects/user-name.vo';
+import UserEmail from '@/core/user/domain/entity/value-objects/user-email.vo';
+import { CreatedAt } from '@/core/shared-domain/value-objects/create-at.vo';
+import { UpdatedAt } from '@/core/shared-domain/value-objects/update-at.vo';
+import { DeletedAt } from '@/core/shared-domain/value-objects/delete-at.vo';
+import { Uuid } from '@/core/shared-domain/value-objects/uuid.vo';
 
 interface PostgresError extends QueryFailedError {
   code: string;
@@ -36,5 +42,21 @@ export default class UserRepositoryImpl implements UserRepository {
       }
       throw error;
     }
+  }
+
+  async findAll(): Promise<User[]> {
+    const listUsersOrm = await this.repository.find();
+    return listUsersOrm.map((orm) => this.toDomain(orm));
+  }
+
+  private toDomain(orm: UserOrmEntity): User {
+    return User.reconstitute({
+      id: new Uuid(orm.id),
+      name: new UserName(orm.name),
+      email: new UserEmail(orm.email),
+      createdAt: new CreatedAt(orm.createdAt),
+      updatedAt: new UpdatedAt(orm.updatedAt, orm.createdAt),
+      deletedAt: new DeletedAt(orm.deletedAt, orm.createdAt),
+    });
   }
 }
