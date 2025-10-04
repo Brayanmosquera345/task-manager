@@ -8,6 +8,10 @@ import { InvalidTaskDescriptionException } from '@/core/task/domain/exceptions/i
 import { InvalidTaskDueDateException } from '@/core/task/domain/exceptions/invalid-task-due-date.exception';
 import { InvalidTaskUserIdException } from '@/core/task/domain/exceptions/invalid-task-user-id.exception';
 import { InvalidTaskStatusException } from '@/core/task/domain/exceptions/invalid-task-status.exception';
+import { InvalidCreateAtException } from '@/core/shared-domain/exceptions/invalid-create-at.exception';
+import { InvalidUpdateAtException } from '@/core/shared-domain/exceptions/invalid-update-at.exception';
+import { InvalidDeleteAtException } from '@/core/shared-domain/exceptions/invalid-delete-at.exception';
+import { InvalidUuidException } from '@/core/shared-domain/exceptions/invalid-uuid.exception';
 
 /**
  * Interfaz para la respuesta HTTP que enviamos al cliente.
@@ -76,6 +80,34 @@ export const mapDomainErrorToHttp = (exception: DomainError): HttpException => {
       data: exception.data,
     };
   } else if (exception instanceof InvalidTaskStatusException) {
+    httpStatus = HttpStatus.BAD_REQUEST;
+    responseBody = {
+      statusCode: httpStatus,
+      message: exception.message,
+      data: exception.data,
+    };
+  } else if (exception instanceof InvalidCreateAtException) {
+    httpStatus = HttpStatus.BAD_REQUEST;
+    responseBody = {
+      statusCode: httpStatus,
+      message: exception.message,
+      data: exception.data,
+    };
+  } else if (exception instanceof InvalidUpdateAtException) {
+    httpStatus = HttpStatus.BAD_REQUEST;
+    responseBody = {
+      statusCode: httpStatus,
+      message: exception.message,
+      data: exception.data,
+    };
+  } else if (exception instanceof InvalidDeleteAtException) {
+    httpStatus = HttpStatus.BAD_REQUEST;
+    responseBody = {
+      statusCode: httpStatus,
+      message: exception.message,
+      data: exception.data,
+    };
+  } else if (exception instanceof InvalidUuidException) {
     httpStatus = HttpStatus.BAD_REQUEST;
     responseBody = {
       statusCode: httpStatus,

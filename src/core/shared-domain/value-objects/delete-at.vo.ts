@@ -1,9 +1,10 @@
+import { InvalidDeleteAtException } from '../exceptions/invalid-delete-at.exception';
 export class DeletedAt {
   readonly value: Date | null;
 
   constructor(value: Date | null, createdAt: Date) {
     if (value && value < createdAt) {
-      throw new Error('DeletedAt cannot be before CreatedAt');
+      throw new InvalidDeleteAtException(value);
     }
     this.value = value;
   }
