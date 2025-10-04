@@ -1,3 +1,5 @@
+import { UserNameTooLongError } from '../../exceptions/user-name-long.exception';
+
 export default class UserName {
   value: string;
 
@@ -7,8 +9,8 @@ export default class UserName {
   }
 
   private ensureNameIsValid() {
-    if (this.value.length < 3) {
-      throw new Error('Name must be at least 3 characters');
+    if (this.value.length < 3 || this.value.length > 50) {
+      throw new UserNameTooLongError(this.value);
     }
   }
 }

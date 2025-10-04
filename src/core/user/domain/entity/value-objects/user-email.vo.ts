@@ -1,3 +1,4 @@
+import { UserEmailNotValidError } from '../../exceptions/user-email-valid.exception';
 export default class UserEmail {
   readonly value: string;
 
@@ -11,7 +12,7 @@ export default class UserEmail {
 
   private ensureEmailIsValid() {
     if (!UserEmail.EMAIL_REGEX.test(this.value)) {
-      throw new Error('Invalid email format');
+      throw new UserEmailNotValidError(this.value);
     }
   }
 }
