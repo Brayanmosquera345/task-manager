@@ -5,7 +5,9 @@ import {
   PrimaryColumn,
   DeleteDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import TaskOrmEntity from '@/core/task/infrastructure/persistence/entity/task-orm.entity';
 
 @Entity('users')
 export default class UserOrmEntity {
@@ -26,4 +28,7 @@ export default class UserOrmEntity {
 
   @DeleteDateColumn()
   deletedAt: Date | null;
+
+  @OneToMany(() => TaskOrmEntity, (task) => task.userId)
+  tasks: TaskOrmEntity[];
 }

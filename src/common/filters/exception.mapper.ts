@@ -3,6 +3,11 @@ import { DomainError } from '@/core/shared-domain/exceptions/base.exeception';
 import { UserAlreadyExistsError } from '@/core/user/domain/exceptions/user-already-exists.exception';
 import { UserNameTooLongError } from '@/core/user/domain/exceptions/user-name-long.exception';
 import { UserEmailNotValidError } from '@/core/user/domain/exceptions/user-email-valid.exception';
+import { InvalidTaskNameException } from '@/core/task/domain/exceptions/invalid-task-name.exception';
+import { InvalidTaskDescriptionException } from '@/core/task/domain/exceptions/invalid-task-description.exception';
+import { InvalidTaskDueDateException } from '@/core/task/domain/exceptions/invalid-task-due-date.exception';
+import { InvalidTaskUserIdException } from '@/core/task/domain/exceptions/invalid-task-user-id.exception';
+import { InvalidTaskStatusException } from '@/core/task/domain/exceptions/invalid-task-status.exception';
 
 /**
  * Interfaz para la respuesta HTTP que enviamos al cliente.
@@ -36,6 +41,41 @@ export const mapDomainErrorToHttp = (exception: DomainError): HttpException => {
       data: exception.data,
     };
   } else if (exception instanceof UserEmailNotValidError) {
+    httpStatus = HttpStatus.BAD_REQUEST;
+    responseBody = {
+      statusCode: httpStatus,
+      message: exception.message,
+      data: exception.data,
+    };
+  } else if (exception instanceof InvalidTaskNameException) {
+    httpStatus = HttpStatus.BAD_REQUEST;
+    responseBody = {
+      statusCode: httpStatus,
+      message: exception.message,
+      data: exception.data,
+    };
+  } else if (exception instanceof InvalidTaskDescriptionException) {
+    httpStatus = HttpStatus.BAD_REQUEST;
+    responseBody = {
+      statusCode: httpStatus,
+      message: exception.message,
+      data: exception.data,
+    };
+  } else if (exception instanceof InvalidTaskDueDateException) {
+    httpStatus = HttpStatus.BAD_REQUEST;
+    responseBody = {
+      statusCode: httpStatus,
+      message: exception.message,
+      data: exception.data,
+    };
+  } else if (exception instanceof InvalidTaskUserIdException) {
+    httpStatus = HttpStatus.BAD_REQUEST;
+    responseBody = {
+      statusCode: httpStatus,
+      message: exception.message,
+      data: exception.data,
+    };
+  } else if (exception instanceof InvalidTaskStatusException) {
     httpStatus = HttpStatus.BAD_REQUEST;
     responseBody = {
       statusCode: httpStatus,
