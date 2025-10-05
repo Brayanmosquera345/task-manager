@@ -8,7 +8,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import UserOrmEntity from '@/core/user/infrastructure/persistence/entity/user-orm.entyti';
+import UserOrmEntity from '@/core/user/infrastructure/persistence/entity/user-orm.entity';
 import { TaskStatusEnum } from '@/core/task/domain/entity/value-objects/task-status.ov';
 @Entity('tasks')
 export default class TaskOrmEntity {

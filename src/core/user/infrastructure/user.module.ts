@@ -4,7 +4,7 @@ import { FindAllUserUseCase } from '../application/UserFindAll/find-all-user.use
 import { CryptoUuidGenerator } from '@/core/shared-infrastructure/uuid/crypto-uuid-generator';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import UserRepositoryImpl from './persistence/repository/user.repository.impl';
-import UserOrmEntity from './persistence/entity/user-orm.entyti';
+import UserOrmEntity from './persistence/entity/user-orm.entity';
 import UserController from './http/controllers/user.controller';
 
 @Module({

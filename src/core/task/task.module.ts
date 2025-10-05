@@ -6,7 +6,7 @@ import { CreateTaskUseCase } from './application/CreateTask/create-task.use-case
 import { FindTaskByUserUseCase } from './application/FindTaskByUser/find-task-by-user.use-case';
 import TaskController from './infrastructure/http/controller/task.controller';
 import TaskOrmEntity from './infrastructure/persistence/entity/task-orm.entity';
-import UserOrmEntity from '../user/infrastructure/persistence/entity/user-orm.entyti';
+import UserOrmEntity from '../user/infrastructure/persistence/entity/user-orm.entity';
 import { DeleteTaskUseCase } from './application/DeleteTask/delete-task.use-case';
 import { ChangeStatusTaskUseCase } from './application/ChangeStatusTask/change-status-task.use-case';
 import UserRepositoryImpl from '../user/infrastructure/persistence/repository/user.repository.impl';

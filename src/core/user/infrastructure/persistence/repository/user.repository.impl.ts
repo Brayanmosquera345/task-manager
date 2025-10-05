@@ -1,6 +1,6 @@
 import User from '@/core/user/domain/entity/user.entity';
 import { UserRepository } from '@/core/user/domain/repository/user.repository';
-import UserOrmEntity from '../entity/user-orm.entyti';
+import UserOrmEntity from '../entity/user-orm.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QueryFailedError, Repository } from 'typeorm';
 import { UserAlreadyExistsError } from '@/core/user/domain/exceptions/user-already-exists.exception';

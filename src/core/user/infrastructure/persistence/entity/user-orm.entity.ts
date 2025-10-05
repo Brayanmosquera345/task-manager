@@ -7,7 +7,7 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from 'typeorm';
-import TaskOrmEntity from '@/core/task/infrastructure/persistence/entity/task-orm.entity';
+import TaskOrmEntity from '../../../../task/infrastructure/persistence/entity/task-orm.entity';
 
 @Entity('users')
 export default class UserOrmEntity {
