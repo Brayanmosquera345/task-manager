@@ -6,6 +6,7 @@ import { CreateTaskUseCase } from './application/CreateTask/create-task.use-case
 import { FindTaskByUserUseCase } from './application/FindTaskByUser/find-task-by-user.use-case';
 import TaskController from './infrastructure/http/controller/task.controller';
 import TaskOrmEntity from './infrastructure/persistence/entity/task-orm.entity';
+import { DeleteTaskUseCase } from './application/DeleteTask/delete-task.use-case';
 
 @Module({
   imports: [TypeOrmModule.forFeature([TaskOrmEntity])],
@@ -29,6 +30,12 @@ import TaskOrmEntity from './infrastructure/persistence/entity/task-orm.entity';
       provide: 'FindTaskByUserUseCase',
       useFactory: (repository: TaskRepositoryImpl) =>
         new FindTaskByUserUseCase(repository),
+      inject: ['TaskRepository'],
+    },
+    {
+      provide: 'DeleteTaskUseCase',
+      useFactory: (repository: TaskRepositoryImpl) =>
+        new DeleteTaskUseCase(repository),
       inject: ['TaskRepository'],
     },
   ],

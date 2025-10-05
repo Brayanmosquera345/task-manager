@@ -8,6 +8,7 @@ import {
   ParseUUIDPipe,
   ValidationPipe,
   Query,
+  Delete,
 } from '@nestjs/common';
 import { CreateTaskDto } from '../dto/create-task.dto';
 import { ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -19,6 +20,7 @@ import { Uuid } from '@/core/shared-domain/value-objects/uuid.vo';
 import { mapDomainErrorToHttp } from '@/common/filters/exception.mapper';
 import { FindTasksQueryDto } from '../dto/find-tasks-query.dto';
 import { TaskStatusEnum } from '@/core/task/domain/entity/value-objects/task-status.ov';
+import { DeleteTaskUseCase } from '@/core/task/application/DeleteTask/delete-task.use-case';
 
 const TASK_STATUS_VALUES = Object.values(TaskStatusEnum);
 
@@ -30,6 +32,8 @@ export default class TaskController {
     private readonly createTaskUseCase: CreateTaskUseCase,
     @Inject('FindTaskByUserUseCase')
     private readonly findTaskByUserUseCase: FindTaskByUserUseCase,
+    @Inject('DeleteTaskUseCase')
+    private readonly deleteTaskUseCase: DeleteTaskUseCase,
   ) {}
 
   @Post()
@@ -77,6 +81,17 @@ export default class TaskController {
         query.showDeleted,
       );
       return tasks.map((task) => this.toResponseDto(task));
+    } catch (error) {
+      throw mapDomainErrorToHttp(error);
+    }
+  }
+
+  @Delete(':id')
+  async deleteTask(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<void> {
+    try {
+      await this.deleteTaskUseCase.execute(new Uuid(id));
     } catch (error) {
       throw mapDomainErrorToHttp(error);
     }

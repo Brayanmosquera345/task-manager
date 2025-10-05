@@ -12,6 +12,8 @@ import { InvalidCreateAtException } from '@/core/shared-domain/exceptions/invali
 import { InvalidUpdateAtException } from '@/core/shared-domain/exceptions/invalid-update-at.exception';
 import { InvalidDeleteAtException } from '@/core/shared-domain/exceptions/invalid-delete-at.exception';
 import { InvalidUuidException } from '@/core/shared-domain/exceptions/invalid-uuid.exception';
+import { TaskNotFoundException } from '@/core/task/domain/exceptions/task-not-found.exception';
+import { TaskAlreadyDeletedException } from '@/core/task/domain/exceptions/task-already-deleted.exception';
 
 /**
  * Interfaz para la respuesta HTTP que enviamos al cliente.
@@ -109,6 +111,20 @@ export const mapDomainErrorToHttp = (exception: DomainError): HttpException => {
     };
   } else if (exception instanceof InvalidUuidException) {
     httpStatus = HttpStatus.BAD_REQUEST;
+    responseBody = {
+      statusCode: httpStatus,
+      message: exception.message,
+      data: exception.data,
+    };
+  } else if (exception instanceof TaskNotFoundException) {
+    httpStatus = HttpStatus.NOT_FOUND;
+    responseBody = {
+      statusCode: httpStatus,
+      message: exception.message,
+      data: exception.data,
+    };
+  } else if (exception instanceof TaskAlreadyDeletedException) {
+    httpStatus = HttpStatus.CONFLICT;
     responseBody = {
       statusCode: httpStatus,
       message: exception.message,

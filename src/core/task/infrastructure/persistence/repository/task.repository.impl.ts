@@ -15,6 +15,7 @@ import { TaskDueDate } from '@/core/task/domain/entity/value-objects/task-due-da
 import { CreatedAt } from '@/core/shared-domain/value-objects/create-at.vo';
 import { UpdatedAt } from '@/core/shared-domain/value-objects/update-at.vo';
 import { DeletedAt } from '@/core/shared-domain/value-objects/delete-at.vo';
+import { TaskNotFoundException } from '@/core/task/domain/exceptions/task-not-found.exception';
 
 interface PostgresError extends QueryFailedError {
   code: string;
@@ -71,6 +72,39 @@ export class TaskRepositoryImpl implements TaskRepository {
     const listTasksOrm = await queryBuilder.getMany();
 
     return listTasksOrm.map((orm) => this.toDomain(orm));
+  }
+
+  async updateTask(id: string, task: Task): Promise<void> {
+    const taskOrmEntity = {
+      id,
+      name: task.name.value,
+      description: task.description.value,
+      status: task.status.value,
+      dueDate: task.dueDate.value,
+      userId: task.userId.value,
+      createdAt: task.createdAt,
+      updatedAt: task.updatedAt,
+      deletedAt: task.deletedAt,
+    };
+    try {
+      await this.repository.save(taskOrmEntity);
+    } catch (e) {
+      if (e instanceof QueryFailedError) {
+        const postgresError = e as PostgresError;
+        if (postgresError.code === '23505') {
+          throw new TaskNotFoundException(id);
+        }
+      }
+      throw e;
+    }
+  }
+
+  async getTaskById(id: string): Promise<Task> {
+    const taskOrm = await this.repository.findOne({ where: { id } });
+    if (!taskOrm) {
+      throw new TaskNotFoundException(id);
+    }
+    return this.toDomain(taskOrm);
   }
 
   private toDomain(orm: TaskOrmEntity): Task {

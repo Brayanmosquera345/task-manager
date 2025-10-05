@@ -8,4 +8,6 @@ export interface TaskRepository {
     status?: TaskStatusEnum,
     showDeleted?: boolean,
   ): Promise<Task[]>;
+  updateTask(id: string, task: Task): Promise<void>;
+  getTaskById(id: string): Promise<Task>;
 }
