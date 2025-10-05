@@ -99,7 +99,7 @@ export class TaskRepositoryImpl implements TaskRepository {
     }
   }
 
-  async getTaskById(id: string): Promise<Task> {
+  async getTaskById(id: string): Promise<Task | null> {
     const taskOrm = await this.repository.findOne({ where: { id } });
     if (!taskOrm) {
       throw new TaskNotFoundException(id);

@@ -9,5 +9,5 @@ export interface TaskRepository {
     showDeleted?: boolean,
   ): Promise<Task[]>;
   updateTask(id: string, task: Task): Promise<void>;
-  getTaskById(id: string): Promise<Task>;
+  getTaskById(id: string): Promise<Task | null>;
 }

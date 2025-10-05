@@ -50,7 +50,7 @@ export default class UserRepositoryImpl implements UserRepository {
     return listUsersOrm.map((orm) => this.toDomain(orm));
   }
 
-  async findById(id: string): Promise<User> {
+  async findById(id: string): Promise<User | null> {
     const userOrm = await this.repository.findOne({
       where: { id },
     });
