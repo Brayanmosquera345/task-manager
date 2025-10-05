@@ -10,6 +10,7 @@ import { CreatedAt } from '@/core/shared-domain/value-objects/create-at.vo';
 import { UpdatedAt } from '@/core/shared-domain/value-objects/update-at.vo';
 import { DeletedAt } from '@/core/shared-domain/value-objects/delete-at.vo';
 import { Uuid } from '@/core/shared-domain/value-objects/uuid.vo';
+import { UserNotFoundException } from '@/core/user/domain/exceptions/user-not-found.exception';
 
 interface PostgresError extends QueryFailedError {
   code: string;
@@ -47,6 +48,16 @@ export default class UserRepositoryImpl implements UserRepository {
   async findAll(): Promise<User[]> {
     const listUsersOrm = await this.repository.find();
     return listUsersOrm.map((orm) => this.toDomain(orm));
+  }
+
+  async findById(id: string): Promise<User> {
+    const userOrm = await this.repository.findOne({
+      where: { id },
+    });
+    if (!userOrm) {
+      throw new UserNotFoundException(id);
+    }
+    return this.toDomain(userOrm);
   }
 
   private toDomain(orm: UserOrmEntity): User {

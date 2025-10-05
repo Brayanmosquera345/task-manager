@@ -6,14 +6,17 @@ import { CreateTaskUseCase } from './application/CreateTask/create-task.use-case
 import { FindTaskByUserUseCase } from './application/FindTaskByUser/find-task-by-user.use-case';
 import TaskController from './infrastructure/http/controller/task.controller';
 import TaskOrmEntity from './infrastructure/persistence/entity/task-orm.entity';
+import UserOrmEntity from '../user/infrastructure/persistence/entity/user-orm.entyti';
 import { DeleteTaskUseCase } from './application/DeleteTask/delete-task.use-case';
 import { ChangeStatusTaskUseCase } from './application/ChangeStatusTask/change-status-task.use-case';
+import UserRepositoryImpl from '../user/infrastructure/persistence/repository/user.repository.impl';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([TaskOrmEntity])],
+  imports: [TypeOrmModule.forFeature([TaskOrmEntity, UserOrmEntity])],
   controllers: [TaskController],
   providers: [
     TaskRepositoryImpl,
+    UserRepositoryImpl,
     {
       provide: 'TaskRepository',
       useClass: TaskRepositoryImpl,
@@ -24,14 +27,17 @@ import { ChangeStatusTaskUseCase } from './application/ChangeStatusTask/change-s
       useFactory: (
         repository: TaskRepositoryImpl,
         uuidGenerator: CryptoUuidGenerator,
-      ) => new CreateTaskUseCase(repository, uuidGenerator),
-      inject: ['TaskRepository', CryptoUuidGenerator],
+        userRepository: UserRepositoryImpl,
+      ) => new CreateTaskUseCase(repository, uuidGenerator, userRepository),
+      inject: ['TaskRepository', CryptoUuidGenerator, UserRepositoryImpl],
     },
     {
       provide: 'FindTaskByUserUseCase',
-      useFactory: (repository: TaskRepositoryImpl) =>
-        new FindTaskByUserUseCase(repository),
-      inject: ['TaskRepository'],
+      useFactory: (
+        repository: TaskRepositoryImpl,
+        userRepository: UserRepositoryImpl,
+      ) => new FindTaskByUserUseCase(repository, userRepository),
+      inject: ['TaskRepository', UserRepositoryImpl],
     },
     {
       provide: 'DeleteTaskUseCase',

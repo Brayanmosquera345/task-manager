@@ -10,11 +10,14 @@ import {
   TaskStatusEnum,
 } from '../../domain/entity/value-objects/task-status.ov';
 import { TaskDueDate } from '../../domain/entity/value-objects/task-due-date.ov';
+import { UserRepository } from '@/core/user/domain/repository/user.repository';
+import { UserNotFoundException } from '@/core/user/domain/exceptions/user-not-found.exception';
 
 export class CreateTaskUseCase {
   constructor(
     private taskRepository: TaskRepository,
     private uuidGenerator: UuidGenerator,
+    private userRepository: UserRepository,
   ) {}
 
   async execute(
@@ -24,6 +27,10 @@ export class CreateTaskUseCase {
     dueDate: Date,
     userId: string,
   ): Promise<void> {
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new UserNotFoundException(userId);
+    }
     const props = EntityBase.createNew();
     const newTask = new Task(
       new Uuid(this.uuidGenerator.generate()),
@@ -31,7 +38,7 @@ export class CreateTaskUseCase {
       new TaskDescription(description),
       new TaskStatus(status),
       new TaskDueDate(dueDate),
-      new Uuid(userId),
+      new Uuid(user.id),
       props.createdAt,
       props.updatedAt,
       props.deletedAt,
