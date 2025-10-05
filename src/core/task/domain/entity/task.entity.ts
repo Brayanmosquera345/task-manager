@@ -3,10 +3,11 @@ import { CreatedAt } from '@/core/shared-domain/value-objects/create-at.vo';
 import { DeletedAt } from '@/core/shared-domain/value-objects/delete-at.vo';
 import { UpdatedAt } from '@/core/shared-domain/value-objects/update-at.vo';
 import { Uuid } from '@/core/shared-domain/value-objects/uuid.vo';
-import { TaskStatus } from './value-objects/task-status.ov';
+import { TaskStatus, TaskStatusEnum } from './value-objects/task-status.ov';
 import { TaskName } from './value-objects/task-name.ov';
 import { TaskDescription } from './value-objects/task-description.ov';
 import { TaskDueDate } from './value-objects/task-due-date.ov';
+import { TaskStatusAlreadyStatusException } from '../exceptions/task-already-status.exception';
 
 interface TaskReconstitutionProps {
   id: Uuid;
@@ -78,5 +79,12 @@ export class Task extends EntityBase {
 
   get userId(): Uuid {
     return this._userId;
+  }
+
+  chageStatus(status: TaskStatusEnum): void {
+    if (this._status.value === status) {
+      throw new TaskStatusAlreadyStatusException(status);
+    }
+    this._status = new TaskStatus(status);
   }
 }
