@@ -57,7 +57,7 @@ export class TaskRepositoryImpl implements TaskRepository {
   async findByUserId(
     userId: string,
     status?: TaskStatusEnum,
-    showDeleted?: boolean,
+    showDeleted?: boolean | string,
   ): Promise<Task[]> {
     const queryBuilder = this.repository.createQueryBuilder('tasks');
     queryBuilder.where('tasks.userId = :userId', { userId });
@@ -65,7 +65,12 @@ export class TaskRepositoryImpl implements TaskRepository {
     if (status) {
       queryBuilder.andWhere('tasks.status = :status', { status });
     }
-    if (showDeleted) {
+    const shouldShowDeleted =
+      typeof showDeleted === 'string'
+        ? showDeleted.toLowerCase() === 'true'
+        : !!showDeleted;
+
+    if (shouldShowDeleted) {
       queryBuilder.withDeleted();
     }
 
