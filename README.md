@@ -1,98 +1,187 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Task Manager API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API para la gestión de usuarios y tareas, implementando buenas practicas y arquitectura hexagonal con soporte de manejo de errores centralizado, filtrado de tareas y soft delete.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Instalación
 
-## Description
+### Requisitos
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- Node.js >= 18
+- npm >= 9
+- PostgreSQL (si no se usa Docker)
 
-## Project setup
+### Usando Docker
+
+1. Levantar los servicios con Docker Compose:
+```bash
+docker-compose up -d
+```
+Esto levantará la base de datos y la aplicación automáticamente.
+
+### Sin Docker
+
+Crear la base de datos en PostgreSQL:
 
 ```bash
-$ npm install
+
+CREATE DATABASE task_manager;
 ```
 
-## Compile and run the project
+Configurar las variables de entorno en un archivo .env puedes copiar el archivo `.env.example`:
+```bash
+DATABASE_URL=postgres://postgres:123@postgres:5432/task_manager
+PORT=3000
+```
+
+
+Instalar dependencias:
+```bash
+npm install
+```
+
+
+Ejecutar las migraciones de TypeORM:
+```bash
+npm run migration:run
+```
+
+Levantar la aplicación:
+```bash
+npm run start:dev
+```
+
+Documentación de la API:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+http://localhost:3000/api-docs
 ```
 
-## Run tests
+## Endpoints
 
-```bash
-# unit tests
-$ npm run test
+### 1. Usuarios
 
-# e2e tests
-$ npm run test:e2e
+- **Crear usuario**  
+  `POST /api/v1/users`  
+  Crea un nuevo usuario.
 
-# test coverage
-$ npm run test:cov
+### 2. Tareas
+
+- **Crear tarea**  
+  `POST /api/v1/tasks`  
+  Crea una nueva tarea para un usuario.
+
+- **Listar tareas de un usuario**  
+  `GET /api/v1/tasks/user/:userId`  
+  Obtiene todas las tareas asociadas a un usuario específico.
+
+- **Eliminar tarea**  
+  `DELETE /api/v1/tasks/:id`  
+  Elimina una tarea. Esta operación implementa **soft delete**, marcando la tarea como inactiva en lugar de borrarla físicamente.
+
+- **Cambiar estado de una tarea**  
+  `PATCH /api/v1/tasks/:id`  
+  Actualiza el estado de una tarea específica.
+
+---
+
+## Explicación de decisiones técnicas
+
+La arquitectura de este proyecto está basada en **Arquitectura Hexagonal (Ports & Adapters)**, lo que permite una separación clara de responsabilidades, escalabilidad y facilidad de mantenimiento.
+
+### 1. División en capas
+
+Cada módulo está organizado en **tres capas principales**:
+
+* **Dominio (`domain`)**:  
+  Contiene la lógica de negocio pura del módulo.
+
+  * **Entities**: Definición de las entidades principales del módulo.  
+  * **Value Objects (OV)**: Objetos de valor que encapsulan reglas de negocio específicas.  
+  * **Excepciones**: Errores específicos del dominio, encapsulados dentro del módulo.  
+  * **Repository**: Interfaz de acceso a datos, encapsulando la lógica de persistencia.  
+
+* **Aplicación (`application`)**:  
+  Contiene los casos de uso y la orquestación de la lógica de negocio. Cada caso de uso interactúa con las interfaces definidas en el dominio y con la infraestructura a través de adaptadores.
+
+* **Infraestructura (`infrastructure`)**:  
+  Implementa detalles técnicos específicos de NestJS y se divide en:
+
+  * **http**: Implementación de las rutas de la API REST, DTOs, documentación y validaciones.  
+  * **persistence**: Consultas a la base de datos y entidades.  
+  * **module**: Configuración específica de NestJS y definición de dependencias de la aplicación.  
+
+### 2. Módulo compartido (`shared-domain`)
+
+Se creó un módulo compartido con clases base y utilidades reutilizables:
+
+* **BaseEntity**: Implementa automáticamente lógica de **soft delete**, campos comunes y métodos reutilizables.  
+* **BaseException**: Clase base para manejar excepciones de forma consistente.  
+* **Interfaces**: Clases de interfaces para reutilizar en distintos módulos.  
+* Objetos de valor y utilidades globales reutilizables entre módulos.  
+
+### 3. Módulo compartido (`shared-infrastructure`)
+
+Se creó un módulo compartido para manejar la generación de UUIDs y otros casos de infraestructura reutilizables en distintos módulos.
+
+### 4. Otras decisiones técnicas
+
+* **Soft delete centralizado**: Gracias a la BaseEntity, cualquier entidad que extienda esta clase maneja el campo `deletedAt` automáticamente.  
+* **Manejo de errores centralizado**: Cada módulo define sus propias excepciones, pero todas se mapean a respuestas HTTP de forma consistente mediante un filtro global (`exception.mapper.ts`).  
+* **Filtrado y consultas**: La lógica de filtrado es extensible y reutilizable entre módulos, respetando la separación de capas.  
+* **Migraciones**: Se implementan migraciones para facilitar el mantenimiento de la base de datos en producción.
+
+### Ejemplos de Requests y Responses
+
+**Listar tareas de un usuario**
+
+- **Request**
+```http
+GET http://localhost:3000/api/v1/tasks/user/6f88436d-f93e-4d15-a6db-91f0fc4de92c?showDeleted=false
+````
+
+* **Response**
+
+```json
+[
+  {
+    "id": "53d7b727-f8b1-4c20-ba8c-4312fe48614c",
+    "name": "Planificación de la sprint 5",
+    "description": "Definir historias de usuario, estimar puntos y asignar responsables.",
+    "status": "IN_PROGRESS",
+    "dueDate": "Tue Dec 30 2025",
+    "createdAt": "Sat Oct 04 2025",
+    "updatedAt": "Sat Oct 04 2025",
+    "deletedAt": null
+  }
+]
 ```
 
-## Deployment
+> Nota: El parámetro `showDeleted=false` filtra las tareas eliminadas (soft delete). Si se pone `true`, también se incluirán las tareas con `deletedAt` distinto de `null`.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+**Otros endpoints** (crear usuario, crear tarea, cambiar estado, eliminar tarea)
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+* **Request**: POST, PATCH o DELETE según corresponda.
+* **Response**:
+
+```http
+HTTP/1.1 200 OK
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+> Si ocurre un error, la API devuelve un JSON con el mensaje de error y el código HTTP correspondiente, manejado por el filtro global (`exception.mapper.ts`).
 
-## Resources
+Ejemplo de un error:
 
-Check out a few resources that may come in handy when working with NestJS:
+```json
+{
+  "success": false,
+  "statusCode": 404,
+  "message": "No se ha encontrado el usuario con id: da560d40-fde7-4452-a4b2-99cb7d45a12a",
+  "data": {
+    "id": "da560d40-fde7-4452-a4b2-99cb7d45a12a"
+  },
+  "path": "/api/v1/tasks/user/da560d40-fde7-4452-a4b2-99cb7d45a12a",
+  "timestamp": "2025-10-05T17:11:55.263Z"
+}
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
