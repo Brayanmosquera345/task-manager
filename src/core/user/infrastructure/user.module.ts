@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import UserCreate from '../application/UserCreate/UserCreate';
 import { FindAllUserUseCase } from '../application/UserFindAll/find-all-user.use-case';
+import { DeleteUserUseCase } from '../application/DeleteUser/delete-user.use-case';
 import { CryptoUuidGenerator } from '@/core/shared-infrastructure/uuid/crypto-uuid-generator';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import UserRepositoryImpl from './persistence/repository/user.repository.impl';
@@ -28,6 +29,12 @@ import UserController from './http/controllers/user.controller';
       provide: 'FindAllUserUseCase',
       useFactory: (repository: UserRepositoryImpl) =>
         new FindAllUserUseCase(repository),
+      inject: ['UserRepository'],
+    },
+    {
+      provide: 'DeleteUserUseCase',
+      useFactory: (repository: UserRepositoryImpl) =>
+        new DeleteUserUseCase(repository),
       inject: ['UserRepository'],
     },
   ],

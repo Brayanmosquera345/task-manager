@@ -60,6 +60,26 @@ export default class UserRepositoryImpl implements UserRepository {
     return this.toDomain(userOrm);
   }
 
+  async update(id: string, user: User): Promise<void> {
+    try {
+      await this.repository.update(id, {
+        name: user.name.value,
+        email: user.email.value,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        deletedAt: user.deletedAt,
+      });
+    } catch (error) {
+      if (error instanceof QueryFailedError) {
+        const postgresError = error as PostgresError;
+        if (postgresError.code === '23505') {
+          throw new UserAlreadyExistsError(user.email.value);
+        }
+      }
+      throw error;
+    }
+  }
+
   private toDomain(orm: UserOrmEntity): User {
     return User.reconstitute({
       id: new Uuid(orm.id),

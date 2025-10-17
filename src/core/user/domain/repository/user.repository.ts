@@ -4,4 +4,5 @@ export interface UserRepository {
   create(user: User): Promise<void>;
   findAll(): Promise<User[]>;
   findById(id: string): Promise<User | null>;
+  update(id: string, user: User): Promise<void>;
 }
